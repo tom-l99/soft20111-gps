@@ -185,87 +185,98 @@ BOOST_AUTO_TEST_SUITE_END()
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-// This unpleasant bit of code is neccessary to allow the Boost UTF to display vector<string> to cout.
-// See: https://stackoverflow.com/questions/17572583/boost-check-fails-to-compile-operator-for-custom-types
-namespace boost { namespace test_tools {namespace tt_detail{
-template<>
-struct print_log_value<std::vector<std::string> > {
-void operator()( std::ostream& os, std::vector<std::string> const& v)
-{
-    os << '{';
-    for (auto it = v.begin(); it != v.end(); ++it)
-    {
-        if (it != v.begin()) os << ',';
-        os << *it;
-    }
-    os << '}';
-}
-};
-}}}
-
 BOOST_AUTO_TEST_SUITE( ExtractSentenceData )
+
+/////////////////////////////////////////////////////////////////////////
+
+// Displaying vectors directly using the built-in BOOST macros is tricky.
+// For reasons I don't fully understand, just overloading operator<< here doesn't work.
+// See: https://stackoverflow.com/questions/17572583/boost-check-fails-to-compile-operator-for-custom-types
+//
+// So instead we introduce an auxilliary function for formatting the error message for mismatched vectors.
+
+std::ostream& operator<<(std::ostream& outputStream, const std::vector<std::string> & vec)
+{
+    outputStream << '{';
+    for (auto it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) outputStream << ',';
+        outputStream << *it;
+    }
+    outputStream << '}';
+    return outputStream;
+}
+
+std::string formatMismatchedFieldData(const std::vector<std::string> & actualFields, const std::vector<std::string> & expectedFields)
+{
+    std::stringstream outputMessage;
+    outputMessage << "extractSentenceData has failed [ " << actualFields << " != " << expectedFields << " ]";
+    return outputMessage.str();
+}
+
+void checkSentenceDataEqual(const SentenceData & actual, const SentenceData & expected)
+{
+    BOOST_CHECK_EQUAL( actual.first , expected.first );
+
+    BOOST_CHECK_MESSAGE(actual.second == expected.second, formatMismatchedFieldData(actual.second,expected.second));
+}
+
+////////////////////////////////////////////////////////////////////////
 
 BOOST_AUTO_TEST_CASE( ExtractZeroFields )
 {
-    SentenceData sentenceData = extractSentenceData("$GPAAA*56");
+    SentenceData actualSentenceData = extractSentenceData("$GPAAA*56");
+    SentenceData expectedSentenceData = { "AAA" , {} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("AAA") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_CASE( ExtractOneField )
 {
-    SentenceData sentenceData = extractSentenceData("$GPAAA,1*4b");
+    SentenceData actualSentenceData = extractSentenceData("$GPAAA,1*4b");
+    SentenceData expectedSentenceData = { "AAA" , {"1"} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("AAA") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({"1"}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_CASE( ExtractTwoFields )
 {
-    SentenceData sentenceData = extractSentenceData("$GPAAA,1,testing*11");
+    SentenceData actualSentenceData = extractSentenceData("$GPAAA,1,testing*11");
+    SentenceData expectedSentenceData = { "AAA" , {"1","testing"} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("AAA") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({"1","testing"}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_CASE( ExtractGLL )
 {
-    SentenceData sentenceData = extractSentenceData("$GPGLL,5425.31,N,107.03,W,82610*69");
+    SentenceData actualSentenceData = extractSentenceData("$GPGLL,5425.31,N,107.03,W,82610*69");
+    SentenceData expectedSentenceData = { "GLL" , {"5425.31","N","107.03","W","82610"} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("GLL") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({"5425.31","N","107.03","W","82610"}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_CASE( ExtractGGA )
 {
-    SentenceData sentenceData = extractSentenceData("$GPGGA,114530.000,3722.6279,N,00559.1566,W,1,0,,1.0,M,,M,,*4E");
+    SentenceData actualSentenceData = extractSentenceData("$GPGGA,114530.000,3722.6279,N,00559.1566,W,1,0,,1.0,M,,M,,*4E");
+    SentenceData expectedSentenceData = { "GGA" , {"114530.000","3722.6279","N","00559.1566","W","1","0","","1.0","M","","M","",""} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("GGA") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({"114530.000","3722.6279","N","00559.1566","W","1","0","","1.0","M","","M","",""}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_CASE( ExtractRMC )
 {
-    SentenceData sentenceData = extractSentenceData("$GPRMC,115856.000,A,3722.6710,N,00559.3014,W,0.000,0.00,150914,,A*6d");
+    SentenceData actualSentenceData = extractSentenceData("$GPRMC,115856.000,A,3722.6710,N,00559.3014,W,0.000,0.00,150914,,A*6d");
+    SentenceData expectedSentenceData = { "RMC" , {"115856.000","A","3722.6710","N","00559.3014","W","0.000","0.00","150914","","A"} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("RMC") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({"115856.000","A","3722.6710","N","00559.3014","W","0.000","0.00","150914","","A"}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_CASE( ExtractMSS )
 {
-    SentenceData sentenceData = extractSentenceData("$GPMSS,55,27,318.0,100,*66");
+    SentenceData actualSentenceData = extractSentenceData("$GPMSS,55,27,318.0,100,*66");
+    SentenceData expectedSentenceData = { "MSS" , {"55","27","318.0","100",""} };
 
-    BOOST_CHECK_EQUAL( sentenceData.first , std::string("MSS") );
-
-    BOOST_CHECK_EQUAL( sentenceData.second , std::vector<std::string>({"55","27","318.0","100",""}) );
+    checkSentenceDataEqual(actualSentenceData , expectedSentenceData);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
