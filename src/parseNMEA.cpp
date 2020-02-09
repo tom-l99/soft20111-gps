@@ -146,23 +146,23 @@ GPS::Position positionFromSentenceData(SentenceData v)
     }
 
 	if (v.first == "GGA") {
-		if (v.second.size() != 14)
-			throw std::invalid_argument("GGA invalid, incorrect size");
+	    if (v.second.size() != 14)
+		throw std::invalid_argument("GGA invalid, incorrect size");
 	    std::stof(v.second[0]); //value for timestamp
             std::stof(v.second[3]); //value for longitude
             std::stof(v.second[1]); //value for latitude 
 
-		if (!(std::find(validLongitudes.begin(), validLongitudes.end(), v.second[4]) != validLongitudes.end()))
-            throw std::invalid_argument("Directional symbol is not valid");
-		char longitudeDirection = v.second[4][0]; //direction for longitude value
-		if (!(std::find(validLatitudes.begin(), validLatitudes.end(), v.second[2]) != validLatitudes.end()))
-            throw std::invalid_argument("Directional symbol is not valid");
-		char latitudeDirection = v.second[2][0]; //direction for latitude value
+	    if (!(std::find(validLongitudes.begin(), validLongitudes.end(), v.second[4]) != validLongitudes.end()))
+                throw std::invalid_argument("Directional symbol is not valid");
+	    char longitudeDirection = v.second[4][0]; //direction for longitude value
+	    if (!(std::find(validLatitudes.begin(), validLatitudes.end(), v.second[2]) != validLatitudes.end()))
+                throw std::invalid_argument("Directional symbol is not valid");
+	    char latitudeDirection = v.second[2][0]; //direction for latitude value
 
-		//format in correct NMEA sentence data order
-		GPS::Position values(v.second[1], latitudeDirection, v.second[3], longitudeDirection, v.second[8]);
-        return values;
-    }
+	    //format in correct NMEA sentence data order
+	    GPS::Position values(v.second[1], latitudeDirection, v.second[3], longitudeDirection, v.second[8]);
+            return values;
+        }
 	throw std::invalid_argument("Word format is not supported!");	
 }
 
