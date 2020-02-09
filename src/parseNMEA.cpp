@@ -114,11 +114,11 @@ GPS::Position positionFromSentenceData(SentenceData v)
 		std::stof(v.second[0]); // index 0 is latitude - convert both to float from string
 
 		if (!(std::find(validLongitudes.begin(), validLongitudes.end(), v.second[3]) != validLongitudes.end()))
-        	throw std::invalid_argument("Directional symbol is not valid");
-        char longitudeDirection = v.second[3][0];
+        	    throw std::invalid_argument("Directional symbol is not valid");
+                char longitudeDirection = v.second[3][0];
 		if (!(std::find(validLatitudes.begin(), validLatitudes.end(), v.second[1]) != validLatitudes.end()))
-            throw std::invalid_argument("Directional symbol is not valid");
-        char latitudeDirection = v.second[1][0];
+                    throw std::invalid_argument("Directional symbol is not valid");
+                char latitudeDirection = v.second[1][0];
 
 		// format in correct NMEA data order - latitude value and direction, then latitude value and direction
         GPS::Position values(v.second[0], latitudeDirection, v.second[2], longitudeDirection);
@@ -134,11 +134,11 @@ GPS::Position positionFromSentenceData(SentenceData v)
 		std::stof(v.second[2]); // value for latitude
 
 		if (!(std::find(validLongitudes.begin(), validLongitudes.end(), v.second[5]) != validLongitudes.end()))
-            throw std::invalid_argument("Directional symbol is not valid");
-        char longitudeDirection = v.second[5][0]; // direction for longitude value
+                    throw std::invalid_argument("Directional symbol is not valid");
+                char longitudeDirection = v.second[5][0]; // direction for longitude value
 		if (!(std::find(validLatitudes.begin(), validLatitudes.end(), v.second[3]) != validLatitudes.end()))
-            throw std::invalid_argument("Directional symbol is not valid");
-        char latitudeDirection = v.second[3][0]; // direction for latitude value
+                    throw std::invalid_argument("Directional symbol is not valid");
+                char latitudeDirection = v.second[3][0]; // direction for latitude value
 
 		// format in correct NMEA data order again
         GPS::Position values(v.second[2], latitudeDirection, v.second[4], longitudeDirection);
@@ -149,8 +149,8 @@ GPS::Position positionFromSentenceData(SentenceData v)
 		if (v.second.size() != 14)
 			throw std::invalid_argument("GGA invalid, incorrect size");
 	    std::stof(v.second[0]); //value for timestamp
-        std::stof(v.second[3]); //value for longitude
-        std::stof(v.second[1]); //value for latitude 
+            std::stof(v.second[3]); //value for longitude
+            std::stof(v.second[1]); //value for latitude 
 
 		if (!(std::find(validLongitudes.begin(), validLongitudes.end(), v.second[4]) != validLongitudes.end()))
             throw std::invalid_argument("Directional symbol is not valid");
