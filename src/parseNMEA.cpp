@@ -73,10 +73,30 @@ bool hasValidChecksum(std::string s)
     return true;
 }
 
-SentenceData extractSentenceData(std::string)
+SentenceData extractSentenceData(std::string s)
 {
-    // Stub definition, needs implementing
-    return {"",{}};
+    std::string code = s.substr(3,3); // substring for NMEA code
+    std::string fieldStr = s.substr(6); // substring after NMEA code
+
+    //unsigned int fieldLength = fields.length();
+
+
+    std::vector<std::string> data; // insert string data into a vector, excluding commas
+    int start = 1;
+    int counter = 1; // start and counter variables declared for extraction loop
+
+    //while loop until checksum starts with *
+    while (s[counter] != '*'){
+	// Push values to vector from substring if they exist before a "*" or ","
+        if((fieldStr[counter] == '*') || (fieldStr[counter] == ',')){
+            std::string pushdata = fieldStr.substr(start, counter - start);
+            data.push_back(pushdata);
+            start = counter + 1;
+        }
+        counter++; // increment by 1 until extraction is finished
+
+    }
+    return {code, data}; // Return NMEA's string code along with vector data
 }
 
 GPS::Position positionFromSentenceData(SentenceData)
