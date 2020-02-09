@@ -148,7 +148,7 @@ GPS::Position positionFromSentenceData(SentenceData v)
 	if (v.first == "GGA") {
 		if (v.second.size() != 14)
 			throw std::invalid_argument("GGA invalid, incorrect size");
-		std::stof(v.second[0]); //value for timestamp
+	    std::stof(v.second[0]); //value for timestamp
         std::stof(v.second[3]); //value for longitude
         std::stof(v.second[1]); //value for latitude 
 
