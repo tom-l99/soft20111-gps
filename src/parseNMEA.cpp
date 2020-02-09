@@ -168,13 +168,23 @@ GPS::Position positionFromSentenceData(SentenceData v)
 
 Route routeFromLog(std::istream &v)
 {
-	//Route routeTaken;
-	//std::string sentence
-	// Stub definition, needs implementing
-    return {};
-
+    Route routeTaken;
+    std::string sentence;
+    while(getline(v, sentence)) { // check each sentence in log file to see if it is valid
+        if(!isWellFormedSentence(sentence))
+            continue;
+	if(!hasValidChecksum(sentence))
+	    continue;
+	//if invalid, proceed onto next sentence in the file
+        try{
+	    //if valid, extract sentence's respective data
+	    GPS::Position values(0, 0);
+	    values = (positionFromSentenceData(extractSentenceData(sentence)));
+	    routeTaken.push_back(values); // push extracted data to  routeTaken object vector
+	}
+	catch (std::invalid_argument &e){ // catch any other invalid arguments in loop
+	}
+    }
+    return routeTaken; // return any extracted valid data
 }
-
-
 }
-
