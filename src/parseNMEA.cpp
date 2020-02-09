@@ -46,10 +46,10 @@ bool isWellFormedSentence(std::string s)
 bool hasValidChecksum(std::string s)
 {
 	
-	std::string sentence = s; 
+    std::string sentence = s; 
 
-	unsigned int sentenceLength = sentence.length();
-	unsigned int lastChar = sentence.find("*");
+    unsigned int sentenceLength = sentence.length();
+    unsigned int lastChar = sentence.find("*");
     unsigned int value = sentence.find("$") + 1;
 
     int64_t totalcheckSum = 0;
