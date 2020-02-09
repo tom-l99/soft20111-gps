@@ -43,10 +43,34 @@ bool isWellFormedSentence(std::string s)
     return true;
 }
 
-bool hasValidChecksum(std::string)
+bool hasValidChecksum(std::string s)
 {
-    // Stub definition, needs implementing
-    return false;
+	
+	std::string sentence = s; 
+
+	unsigned int sentenceLength = sentence.length();
+	unsigned int lastChar = sentence.find("*");
+    unsigned int value = sentence.find("$") + 1;
+
+    int64_t totalcheckSum = 0;
+    for (; value < lastChar; value++)
+		// loop through string and XOR sentence to calculate the checkSum 
+        totalcheckSum = totalcheckSum ^ sentence[value];
+
+    std::stringstream ss; 
+    ss << std::hex << totalcheckSum; 
+    std::string hexChecksum = ss.str(); 
+	// format stringstream of checksum into hex
+
+    std::string sentenceChecksum = sentence.substr((sentenceLength - 2), 2);
+	// Remove "$" and checksum value from the string
+    std::transform(sentenceChecksum.begin(), sentenceChecksum.end(), sentenceChecksum.begin(), ::toupper);
+    std::transform(hexChecksum.begin(), hexChecksum.end(), hexChecksum.begin(), ::toupper);
+
+    if (!(hexChecksum.compare(sentenceChecksum) == 0))
+        return false;
+
+    return true;
 }
 
 SentenceData extractSentenceData(std::string)
